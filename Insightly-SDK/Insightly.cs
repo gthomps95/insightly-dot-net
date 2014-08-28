@@ -9,6 +9,64 @@ namespace InsightlySDK{
 			this.api_key = api_key;
 		}
 		
+		/// <summary>
+		/// Get comments for an object.
+		/// </summary>
+		/// <returns>
+		/// Comments associated with object identified by id
+		/// </returns>
+		/// <param name='id'>
+		/// ID of object to get comments of
+		/// </param>
+		public JArray GetComments(int id){
+			return this.Get("/v2.1/Comments/" + id).AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Delete a comment.
+		/// </summary>
+		/// <param name='id'>
+		/// ID of object to delete
+		/// </param>
+		public void DeleteComment(int id){
+			this.Delete("/v2.1/Comments/" + id).AsString();
+		}
+
+		/// <summary>
+		/// Creates or updates a comment.
+		/// If you are updating an existing comment,
+		/// be sure to include the optional comment_id parameter.
+		/// </summary>
+		/// <returns>
+		/// The comment, as returned by the server
+		/// </returns>
+		/// <param name='body'>
+		/// Comment body
+		/// </param>
+		/// <param name='owner_user_id'>
+		/// Owner's user id
+		/// </param>
+		/// <param name='comment_id'>
+		/// Optional comment id (provide this if updating an existing comment)
+		/// </param>
+		/// <exception cref='ArgumentException'>
+		/// Thrown if body is null or zero-length.
+		/// </exception>
+		public JObject UpdateComment(string body, int owner_user_id, int? comment_id=null){
+			if((body == null) || (body.Length < 1)){
+				throw new ArgumentException("Comment body cannot be empty.");
+			}
+			
+			JObject data = new JObject();
+			data["BODY"] = body;
+			data["OWNER_USER_ID"] = owner_user_id;
+			if(comment_id != null){
+				data["COMMENT_ID"] = comment_id;
+			}
+			
+			return this.Put("/v2.1/Comments").WithBody(data).AsJson<JObject>();
+		}
+		
 		public JArray GetCurrencies(){
 			return this.Get("/v2.1/Currencies").AsJson<JArray>();
 		}

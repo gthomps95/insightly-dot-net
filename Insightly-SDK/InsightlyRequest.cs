@@ -58,6 +58,10 @@ namespace InsightlySDK{
 			return this;
 		}
 		
+		public InsightlyRequest WithBody<T>(T body){
+			return this.WithBody(JsonConvert.SerializeObject(body));
+		}
+		
 		public InsightlyRequest WithQueryParam(string name, string value){
 			this.query_params.Add(Uri.EscapeDataString(name) + "=" + Uri.EscapeDataString(value));
 			return this;
