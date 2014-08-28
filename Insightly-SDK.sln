@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Insightly-SDK", "Insightly-SDK/Insightly-SDK.csproj", "{1EF58684-A981-4685-81C8-E5E9F8564500}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Insightly-SDK", "Insightly-SDK\Insightly-SDK.csproj", "{1EF58684-A981-4685-81C8-E5E9F8564500}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InsightlyTest", "InsightlyTest\InsightlyTest.csproj", "{783C534A-603D-43CF-86CA-D6B740553D27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,8 +15,12 @@ Global
 		{1EF58684-A981-4685-81C8-E5E9F8564500}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EF58684-A981-4685-81C8-E5E9F8564500}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1EF58684-A981-4685-81C8-E5E9F8564500}.Release|Any CPU.Build.0 = Release|Any CPU
+		{783C534A-603D-43CF-86CA-D6B740553D27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{783C534A-603D-43CF-86CA-D6B740553D27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{783C534A-603D-43CF-86CA-D6B740553D27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{783C534A-603D-43CF-86CA-D6B740553D27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = Insightly-SDK.csproj
+		StartupItem = InsightlyTest\InsightlyTest.csproj
 	EndGlobalSection
 EndGlobal
