@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using Newtonsoft.Json.Linq;
 
@@ -10,6 +11,14 @@ namespace InsightlySDK{
 		
 		public JArray GetCurrencies(){
 			return this.Get("/v2.1/Currencies").AsJson<JArray>();
+		}
+		
+		public JArray GetUsers(){
+			return this.Get ("/v2.1/Users/").AsJson<JArray>();
+		}
+		
+		public JObject GetUser(int id){
+			return this.Get("/v2.1/Users/" + id).AsJson<JObject>();
 		}
 		
 		public void Test(){
@@ -26,6 +35,19 @@ namespace InsightlySDK{
 				passed += 1;
 			}
 			else{
+				failed += 1;
+			}
+			
+			
+			try{
+				var users = this.GetUsers();
+				JObject user = users[0].Value<JObject>();
+				int user_id = user["USER_ID"].Value<int>();
+				Console.WriteLine("PASS: GetUsers, found " + users.Count + " users.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetUsers()");
 				failed += 1;
 			}
 			
