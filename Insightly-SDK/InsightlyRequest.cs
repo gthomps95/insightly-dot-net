@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace Insightly{
+namespace InsightlySDK{
 	public enum HTTPMethod {
 		GET,
 		PUT,

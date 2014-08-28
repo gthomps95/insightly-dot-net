@@ -1,14 +1,13 @@
 using System;
 
-using Insightly;
+using InsightlySDK;
 
 namespace InsightlyTest{
 	class TestMain{
 		public static void Main (string[] args){
 			string api_key = args[0];
-			var request = new InsightlyRequest(api_key, "/v2.1/Users");
-			var response = request.AsJson();
-			Console.WriteLine(response);
+			Insightly i = new Insightly(api_key);
+			i.Test();
 		}
 	}
 }
