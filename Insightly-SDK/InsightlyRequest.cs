@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Insightly{
 	public enum HTTPMethod {
@@ -38,6 +39,14 @@ namespace Insightly{
 			
 			var response = request.GetResponse();
 			return response.GetResponseStream();
+		}
+		
+		public Object AsJson(){
+			return this.AsJson<Object>();
+		}
+		
+		public T AsJson<T>(){
+			return JsonConvert.DeserializeObject<T>(this.AsString());
 		}
 		
 		public string AsString(){
