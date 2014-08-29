@@ -916,6 +916,173 @@ namespace InsightlySDK{
 		public JObject GetPipelineStage(int id){
 			return this.Get("v2.1/PipelineStages/" + id).AsJson<JObject>();
 		}
+		
+		/// <summary>
+		/// Get list project categories.
+		/// </summary>
+		/// <returns>
+		/// The project categories.
+		/// </returns>
+		public JArray GetProjectCategories(){
+			return this.Get("/v2.1/ProjectCategories").AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get a project category.
+		/// </summary>
+		/// <returns>
+		/// The project category.
+		/// </returns>
+		/// <param name='id'>
+		/// <c>CATEGORY_ID</c> of desired category.
+		/// </param>
+		public JObject GetProjectCategory(int id){
+			return this.Get("/v2.1/ProjectCategories/" + id).AsJson<JObject>();
+		}
+
+		/// <summary>
+		/// Add/update a project category.
+		/// </summary>
+		/// <returns>
+		/// The new/update project category, as returned by the server.
+		/// </returns>
+		/// <param name='category'>
+		/// The category to add/update.
+		/// </param>
+		public JObject AddProjectCategory(JObject category){
+			var request = this.Request("/v2.1/ProjectCategories");
+			
+			if(IsValidId(category["CATEGORY_ID"])){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(category).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete a project category.
+		/// </summary>
+		/// <param name='id'>
+		/// <c>CATEGORY_ID</c> of category to be deleted.
+		/// </param>
+		public void DeleteProjectCategory(int id){
+			this.Delete("/v2.1/ProjectCategories/" + id).AsString();
+		}
+		
+		/// <summary>
+		/// Get projects matching specified criteria.
+		/// </summary>
+		/// <returns>
+		/// Matching projects.
+		/// </returns>
+		/// <param name='top'>
+		/// Return the first N projects.
+		/// </param>
+		/// <param name='skip'>
+		/// Skip the first N projects.
+		/// </param>
+		/// <param name='order_by'>
+		/// Order results by specified field(s).
+		/// </param>
+		/// <param name='filters'>
+		/// List of OData filter statements to apply.
+		/// </param>
+		public JArray GetProjects(int? top=null, int? skip=null,
+		                          string order_by = null, List<string> filters=null){
+			var request = this.Get("/v2.1/Projects");
+			BuildODataQuery(request, top: top, skip: skip, order_by: order_by, filters: filters);
+			return request.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get a project.
+		/// </summary>
+		/// <returns>
+		/// The project.
+		/// </returns>
+		/// <param name='id'>
+		/// <c>PROJECT_ID</c> of desired project.
+		/// </param>
+		public JObject GetProject(int id){
+			return this.Get("/v2.1/Projects/" + id).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Add/update a project.
+		/// </summary>
+		/// <returns>
+		/// The new/updated project, as returned by the server.
+		/// </returns>
+		/// <param name='project'>
+		/// Project to add/update.
+		/// </param>
+		public JObject AddProject(JObject project){
+			var request = this.Request("/v2.1/Projects");
+			
+			if(IsValidId(project["PROJECT_ID"])){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(project).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete a project.
+		/// </summary>
+		/// <param name='id'>
+		/// <c>PROJECT_ID</c> of project to be deleted.
+		/// </param>
+		public void DeleteProject(int id){
+			this.Delete("/v2.1/Projects/" + id).AsString();
+		}
+		
+		/// <summary>
+		/// Get the emails attached to a project.
+		/// </summary>
+		/// <returns>
+		/// The project's emails.
+		/// </returns>
+		/// <param name='project_id'>
+		/// <c>PROJECT_ID</c> of desired project.
+		/// </param>
+		public JArray GetProjectEmails(int project_id){
+			return this.Get("/v2.1/Projects/" + project_id + "/Emails")
+				.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get the notes attached to a project.
+		/// </summary>
+		/// <returns>
+		/// The project's notes.
+		/// </returns>
+		/// <param name='project_id'>
+		/// <c>PROJECT_ID</c> of desired project.
+		/// </param>
+		public JArray GetProjectNotes(int project_id){
+			return this.Get("/v2.1/Projects/" + project_id + "/Notes")
+				.AsJson<JArray>();
+		}
+
+		/// <summary>
+		/// Get the tasks attached to a project.
+		/// </summary>
+		/// <returns>
+		/// The project's tasks.
+		/// </returns>
+		/// <param name='project_id'>
+		/// <c>PROJECT_ID</c> of desired project.
+		/// </param>
+		public JArray GetProjectTasks(int project_id){
+			return this.Get("/v2.1/Projects/" + project_id + "/Tasks")
+				.AsJson<JArray>();
+		}
 
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
@@ -1366,6 +1533,92 @@ namespace InsightlySDK{
 			}
 			catch(Exception){
 				Console.WriteLine("FAIL: GetPipelineStages()");
+				failed += 1;
+			}
+			
+			// Test GetProjects()
+			try{
+				var projects = this.GetProjects(top: top, order_by: "DATE_UPDATED_UTC desc");
+				Console.WriteLine("PASS: GetProjects(), found " + projects.Count + " projects.");
+				passed += 1;
+				
+				if(projects.Count > 0){
+					var project = projects[0];
+					int project_id = project["PROJECT_ID"].Value<int>();
+					
+					// Test GetProjectEmails
+					try{
+						var emails = this.GetProjectEmails(project_id);
+						Console.WriteLine("PASS: GetProjectEmails(), found " + emails.Count + " emails.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetProjectEmails()");
+						failed += 1;
+					}
+					
+					// Test GetProjectNotes
+					try{
+						var notes = this.GetProjectNotes(project_id);
+						Console.WriteLine("PASS: GetProjectNotes(), found " + notes.Count + " notes.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetProjectNotes()");
+						failed += 1;
+					}
+					
+					// Test GetProjectTasks
+					try{
+						var emails = this.GetProjectTasks(project_id);
+						Console.WriteLine("PASS: GetProjectTasks(), found " + emails.Count + " tasks.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetProjectTasks()");
+						failed += 1;
+					}
+				}
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetProjects()");
+				failed += 1;
+			}
+			
+			// Test GetProjectCategories
+			try{
+				var categories = this.GetProjectCategories();
+				Console.WriteLine("PASS: GetProjectCategories(), found " + categories.Count + " categories.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetProjectCategories()");
+				failed += 1;
+			}
+			
+			// Test AddProjectCategory()
+			try{
+				var category = new JObject();
+				category["CATEGORY_NAME"] = "Test Category";
+				category["ACTIVE"] = true;
+				category["BACKGROUND_COLOR"] = "000000";
+				category = this.AddProjectCategory(category);
+				Console.WriteLine("PASS: AddProjectCategory()");
+				passed += 1;
+				
+				// Test DeleteProjectCategory()
+				try{
+					this.DeleteProjectCategory(category["CATEGORY_ID"].Value<int>());
+					Console.WriteLine("PASS: DeleteProjectCategory()");
+					passed += 1;
+				}
+				catch(Exception){
+					Console.WriteLine("FAIL: DeleteProjectCategory()");
+					failed += 1;
+				}
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: AddProjectCategory()");
 				failed += 1;
 			}
 			
