@@ -1106,6 +1106,118 @@ namespace InsightlySDK{
 		public JArray GetTags(int parent_id){
 			return this.Get("/v2.1/Tags/" + parent_id).AsJson<JArray>();
 		}
+		
+		/// <summary>
+		/// Get tasks matching specified criteria.
+		/// </summary>
+		/// <returns>
+		/// The tasks.
+		/// </returns>
+		/// <param name='ids'>
+		/// List of <c>TASK_ID</c>s identifying specific tasks to get.
+		/// </param>
+		/// <param name='top'>
+		/// Return first N tasks.
+		/// </param>
+		/// <param name='skip'>
+		/// Skip first N tasks.
+		/// </param>
+		/// <param name='order_by'>
+		/// Orders results by specified field(s)
+		/// </param>
+		/// <param name='filters'>
+		/// List of OData filter statements to apply.
+		/// </param>
+		public JArray GetTasks(List<int> ids=null, int? top=null, int? skip=null,
+		                       string order_by=null, List<string> filters=null){
+			var request = this.Get("/v2.1/Tasks");
+			BuildODataQuery(request, top: top, skip: skip, order_by: order_by, filters: filters);
+			
+			if((ids != null) && (ids.Count > 0)){
+				request.WithQueryParam("ids", String.Join(",", ids));
+			}
+			
+			return request.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get a task.
+		/// </summary>
+		/// <returns>
+		/// The task.
+		/// </returns>
+		/// <param name='id'>
+		/// <c>TASK_ID</c> of desired task.
+		/// </param>
+		public JObject GetTask(int id){
+			return this.Get("/v2.1/Tasks/" + id).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Add/update a task.
+		/// </summary>
+		/// <returns>
+		/// The new/update task, as returned by the server.
+		/// </returns>
+		/// <param name='task'>
+		/// The task to create/update.
+		/// </param>
+		public JObject AddTask(JObject task){
+			var request = this.Request("/v2.1/Tasks");
+			
+			if(IsValidId(task["TASK_ID"])){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(task).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete a task.
+		/// </summary>
+		/// <param name='id'>
+		/// <c>TASK_ID</c> of task to delete.
+		/// </param>
+		public void DeleteTask(int id){
+			this.Delete("/v2.1/Tasks/" + id).ToString();
+		}
+		
+		
+		/// <summary>
+		/// Get comments attached to a task.
+		/// </summary>
+		/// <returns>
+		/// The task's comments.
+		/// </returns>
+		/// <param name='task_id'>
+		/// <c>TASK_ID</c> of desired task.
+		/// </param>
+		public JArray GetTaskComments(int task_id){
+			return this.Get("/v2.1/Tasks/" + task_id + "/Comments").AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Add a comment to a task.
+		/// 
+		/// The comment object should have the following fields:
+		/// * BODY = comment text
+		/// * OWNER_USER_ID = the comment author's numeric user id
+		/// </summary>
+		/// <returns>
+		/// The new comment, as returned by the server.
+		/// </returns>
+		/// <param name='task_id'>
+		/// <c>TASK_ID</c> of task to which the comment will be added.
+		/// </param>
+		/// <param name='comment'>
+		/// The comment to add.
+		/// </param>
+		public JObject AddTaskComment(int task_id, JObject comment){
+			return this.Post("/v2.1/Tasks/" + task_id + "/Comments").WithBody(comment).AsJson<JObject>();
+		}
 
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
@@ -1645,9 +1757,21 @@ namespace InsightlySDK{
 				failed += 1;
 			}
 			
+			// Test GetRelationships()
 			try{
 				var relationships = this.GetRelationships();
 				Console.WriteLine("PASS: getRelationships(), found " + relationships.Count + " relationships.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetTasks()");
+				failed += 1;
+			}
+			
+			// Test GetTasks()
+			try{
+				var tasks = this.GetTasks(top: top, order_by: "DUE_DATE desc");
+				Console.WriteLine("PASS: GetTasks(), found " + tasks.Count + " tasks.");
 				passed += 1;
 			}
 			catch(Exception){
