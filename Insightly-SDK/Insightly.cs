@@ -212,6 +212,29 @@ namespace InsightlySDK{
 			return this.Get("/v2.1/Currencies").AsJson<JArray>();
 		}
 		
+		/// <summary>
+		/// Gets a list of custom fields.
+		/// </summary>
+		/// <returns>
+		/// The custom fields.
+		/// </returns>
+		public JArray GetCustomFields(){
+			return this.Get ("/v2.1/CustomFields").AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Gets details for a custom field, identified by its id.
+		/// </summary>
+		/// <returns>
+		/// The custom field.
+		/// </returns>
+		/// <param name='id'>
+		/// Custom field id.
+		/// </param>
+		public JObject GetCustomField(int id){
+			return this.Get ("/v2.1/CustomFields/" + id).AsJson<JObject>();
+		}
+		
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
 		}
@@ -344,6 +367,17 @@ namespace InsightlySDK{
 			}
 			catch(Exception){
 				Console.WriteLine("FAIL: GetCurrencies()");
+				failed += 1;
+			}
+			
+			// Test GetCustomFields()
+			try{
+				var custom_fields = this.GetCustomFields();
+				Console.WriteLine("PASS: GetCustomFields(), found " + custom_fields.Count + " custom fields.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine ("FAIL: GetCustomFields()");
 				failed += 1;
 			}
 
