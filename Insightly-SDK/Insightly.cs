@@ -388,6 +388,61 @@ namespace InsightlySDK{
 		public void DeleteEvent(int id){
 			this.Delete("/v2.1/Events/" + id).AsString();
 		}
+
+		/// <summary>
+		/// Get file categories.
+		/// </summary>
+		/// <returns>
+		/// The file categories for this account.
+		/// </returns>
+		public JArray GetFileCategories(){
+			return this.Get("/v2.1/FileCategories").AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get a file category.
+		/// </summary>
+		/// <returns>
+		/// File category with specified id.
+		/// </returns>
+		/// <param name='id'>
+		/// CATEGORY_ID of desired category.
+		/// </param>
+		public JObject GetFileCategory(int id){
+			return this.Get("/v2.1/FileCategories/" + id).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Add/update a file category.
+		/// </summary>
+		/// <returns>
+		/// The new/updated file category, as returned by the server.
+		/// </returns>
+		/// <param name='category'>
+		/// The category to add/update.
+		/// </param>
+		public JObject AddFileCategory(JObject category){
+			var request = this.Request("/v2.1/FileCategories");
+			
+			if((category["CATEGORY_ID"] != null) && (category["CATEGORY_ID"].Value<int>() > 0)){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(category).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete a file category.
+		/// </summary>
+		/// <param name='id'>
+		/// CATEGORY_ID of the file category to delete.
+		/// </param>
+		public void DeleteFileCategory(int id){
+			this.Delete("/v2.1/FileCategories/" + id).AsString();
+		}
 		
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
@@ -586,6 +641,44 @@ namespace InsightlySDK{
 			}
 			catch(Exception){
 				Console.WriteLine("FAIL: AddEvent");
+				failed += 1;
+			}
+			
+			// Test GetFileCategories()
+			try{
+				var categories = this.GetFileCategories();
+				Console.WriteLine("PASS: GetFileCategories(), found " + categories.Count + " categories.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetFileCategories()");
+				failed += 1;
+			}
+			
+			// Test AddFileCategory()
+			try{
+				var category = new JObject();
+				category["CATEGORY_NAME"] = "Test Category";
+				category["ACTIVE"] = true;
+				category["BACKGROUND_COLOR"] = "000000";
+				category = this.AddFileCategory(category);
+				Console.WriteLine("PASS: AddFileCategory()");
+				passed += 1;
+				
+				// Test DeleteFileCategory()
+				try{
+					var category_id = category["CATEGORY_ID"].Value<int>();
+					this.DeleteFileCategory(category_id);
+					Console.WriteLine("PASS: DeleteFileCategory()");
+					passed += 1;
+				}
+				catch(Exception){
+					Console.WriteLine("FAIL: DeleteFileCategory()");
+					failed += 1;
+				}
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: AddFileCategory()");
 				failed += 1;
 			}
 
