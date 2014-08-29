@@ -319,6 +319,76 @@ namespace InsightlySDK{
 				.WithBody(data).AsJson<JObject>();
 		}
 		
+		/// <summary>
+		/// Get a calendar of upcoming events.
+		/// </summary>
+		/// <returns>
+		/// Events matching query.
+		/// </returns>
+		/// <param name='top'>
+		/// If provided, return maximum of N records.
+		/// </param>
+		/// <param name='skip'>
+		/// If provided, skip the first N records.
+		/// </param>
+		/// <param name='order_by'>
+		/// If provided, specified field(s) to order results on.
+		/// </param>
+		/// <param name='filters'>
+		/// If provided, specifies a list of OData filters.
+		/// </param>
+		public JArray GetEvents(int? top=null, int? skip=null,
+		                        string order_by=null, List<string> filters=null){
+			var request = this.Get("/v2.1/Events");
+			BuildODataQuery(request, top: top, skip: skip, order_by: order_by, filters: filters);
+			return request.AsJson<JArray>();
+		}
+
+		/// <summary>
+		/// Get and event.
+		/// </summary>
+		/// <returns>
+		/// An event.
+		/// </returns>
+		/// <param name='id'>
+		/// EVENT_ID of the desired event.
+		/// </param>
+		public JObject GetEvent(int id){
+			return this.Get("/v2.1/Events/" + id).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Add/update an event in the calendar.
+		/// </summary>
+		/// <returns>
+		/// The new/updated event, as returned by the server.
+		/// </returns>
+		/// <param name='the_event'>
+		/// The event to add/update.
+		/// </param>
+		public JObject AddEvent(JObject the_event){
+			var request = Request("/v2.1/Events");
+			
+			if((the_event["EVENT_ID"] != null) && (the_event["EVENT_ID"].Value<int>() > 0)){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(the_event).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete an event.
+		/// </summary>
+		/// <param name='id'>
+		/// ID of the event to be deleted.
+		/// </param>
+		public void DeleteEvent(int id){
+			this.Delete("/v2.1/Events/" + id).AsString();
+		}
+		
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
 		}
@@ -344,10 +414,11 @@ namespace InsightlySDK{
 				failed += 1;
 			}
 			
+			int user_id = 0;
 			try{
 				var users = this.GetUsers();
 				JObject user = users[0].Value<JObject>();
-				//int user_id = user["USER_ID"].Value<int>();
+				user_id = user["USER_ID"].Value<int>();
 				Console.WriteLine("PASS: GetUsers, found " + users.Count + " users.");
 				passed += 1;
 			}
@@ -473,6 +544,48 @@ namespace InsightlySDK{
 			}
 			catch{
 				Console.WriteLine("FAIL: GetEmails()");
+				failed += 1;
+			}
+			
+			// Test GetEvents()
+			try{
+				var events = this.GetEvents(top: top);
+				Console.WriteLine("PASS: GetEvents(), found " + events.Count + " events.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetEvents()");
+				failed += 1;
+			}
+			
+			// Test AddEvent()
+			try{
+				var _event = new JObject();
+				_event["TITLE"] = "Test Event";
+				_event["LOCATION"] = "Somewhere";
+				_event["DETAILS"] = "Details";
+				_event["START_DATE_UTC"] = "2014-07-12 12:00:00";
+				_event["END_DATE_UTC"] = "2014-07-12 13:00:00";
+				_event["OWNER_USER_ID"] = user_id;
+				_event["ALL_DAY"] = false;
+				_event["PUBLICLY_VISIBLE"] = true;
+				_event = this.AddEvent(_event);
+				Console.WriteLine("PASS: AddEvent");
+				passed += 1;
+				
+				// Test DeleteEvent()
+				try{
+					this.DeleteEvent(_event["EVENT_ID"].Value<int>());
+					Console.WriteLine("PASS: DeleteEvent()");
+					passed += 1;
+				}
+				catch(Exception){
+					Console.WriteLine("FAIL: DeleteEvent()");
+					failed += 1;
+				}
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: AddEvent");
 				failed += 1;
 			}
 
