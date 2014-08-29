@@ -1083,6 +1083,29 @@ namespace InsightlySDK{
 			return this.Get("/v2.1/Projects/" + project_id + "/Tasks")
 				.AsJson<JArray>();
 		}
+		
+		/// <summary>
+		/// Get a list of relationships.
+		/// </summary>
+		/// <returns>
+		/// The relationships.
+		/// </returns>
+		public JArray GetRelationships(){
+			return this.Get("/v2.1/Relationships").AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get tags associated with a parent object.
+		/// </summary>
+		/// <returns>
+		/// List of tags.
+		/// </returns>
+		/// <param name='parent_id'>
+		/// The id of the parent object.
+		/// </param>
+		public JArray GetTags(int parent_id){
+			return this.Get("/v2.1/Tags/" + parent_id).AsJson<JArray>();
+		}
 
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
@@ -1619,6 +1642,16 @@ namespace InsightlySDK{
 			}
 			catch(Exception){
 				Console.WriteLine("FAIL: AddProjectCategory()");
+				failed += 1;
+			}
+			
+			try{
+				var relationships = this.GetRelationships();
+				Console.WriteLine("PASS: getRelationships(), found " + relationships.Count + " relationships.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetTasks()");
 				failed += 1;
 			}
 			
