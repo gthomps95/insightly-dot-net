@@ -738,6 +738,138 @@ namespace InsightlySDK{
 			return this.Get("/v2.1/OpportunityStateReasons")
 				.AsJson<JArray>();
 		}
+		
+		/// <summary>
+		/// Get organizations matching specified criteria.
+		/// </summary>
+		/// <returns>
+		/// The organizations that match the query.
+		/// </returns>
+		/// <param name='ids'>
+		/// List of ids of organizations to return.
+		/// </param>
+		/// <param name='domain'>
+		/// Domain.
+		/// </param>
+		/// <param name='tag'>
+		/// Tag.
+		/// </param>
+		/// <param name='top'>
+		/// Return first N organizations.
+		/// </param>
+		/// <param name='skip'>
+		/// Skip first N organizations.
+		/// </param>
+		/// <param name='order_by'>
+		/// Order results by specified field(s).
+		/// </param>
+		/// <param name='filters'>
+		/// List of OData filters statements to apply.
+		/// </param>
+		public JArray GetOrganizations(List<int> ids=null, string domain=null, string tag=null,
+		                               int? top=null, int? skip=null, string order_by=null, List<string> filters=null){
+			var request = this.Get("/v2.1/Organisations");
+			BuildODataQuery(request, top: top, skip: skip, order_by: order_by, filters: filters);
+			
+			if(domain != null){
+				request.WithQueryParam("domain", domain);
+			}
+			if(tag != null){
+				request.WithQueryParam("tag", tag);
+			}
+			if(ids != null){
+				request.WithQueryParam("ids", String.Join(",", ids));
+			}
+			
+			return request.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get an organization.
+		/// </summary>
+		/// <returns>
+		/// Matching organization.
+		/// </returns>
+		/// <param name='id'>
+		/// <c>ORGANISATION_ID</c> of desired organization.
+		/// </param>
+		public JObject GetOrganization(int id){
+			return this.Get("/v2.1/Organisations/" + id).AsJson<JObject>();
+		}
+
+		/// <summary>
+		/// Add/update an organization
+		/// </summary>
+		/// <returns>
+		/// The new/updated organization, as returned by the server.
+		/// </returns>
+		/// <param name='organization'>
+		/// Organization to add/update.
+		/// </param>
+		public JObject AddOrganization(JObject organization){
+			var request = this.Request("/v2.1/Organisations");
+			
+			if(IsValidId(organization["ORGANISATION_ID"])){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(organization).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete an organization.
+		/// </summary>
+		/// <param name='id'>
+		/// <c>ORGANISATION_ID</c> of organization to delete.
+		/// </param>
+		public void DeleteOrganization(int id){
+			this.Delete("/v2.1/Organisations/" + id).AsString();
+		}
+
+		/// <summary>
+		/// Get emails attached to an organization.
+		/// </summary>
+		/// <returns>
+		/// The organization's emails.
+		/// </returns>
+		/// <param name='organization_id'>
+		/// <c>ORGANISATION_ID</c> of desired organization.
+		/// </param>
+		public JArray GetOrganizationEmails(int organization_id){
+			return this.Get("/v2.1/Organisations/" + organization_id + "/Emails")
+				.AsJson<JArray>();
+		}
+
+		/// <summary>
+		/// Get notes attached to an organization.
+		/// </summary>
+		/// <returns>
+		/// The organization's notes.
+		/// </returns>
+		/// <param name='organization_id'>
+		/// <c>ORGANISATION_ID</c> of desired organization.
+		/// </param>
+		public JArray GetOrganizationNotes(int organization_id){
+			return this.Get("/v2.1/Organisations/" + organization_id + "/Notes")
+				.AsJson<JArray>();
+		}
+
+		/// <summary>
+		/// Get tasks attached to an organization.
+		/// </summary>
+		/// <returns>
+		/// The organization's tasks.
+		/// </returns>
+		/// <param name='organization_id'>
+		/// <c>ORGANISATION_ID</c> of desired organization.
+		/// </param>
+		public JArray GetOrganizationTasks(int organization_id){
+			return this.Get("/v2.1/Organisations/" + organization_id + "/Tasks")
+				.AsJson<JArray>();
+		}
 
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
@@ -1093,6 +1225,80 @@ namespace InsightlySDK{
 			}
 			catch(Exception){
 				Console.WriteLine("FAIL: GetOpportunityStateReasons()");
+				failed += 1;
+			}
+			
+			// Test GetOrganizations()
+			try{
+				var organizations = this.GetOrganizations(top: top, order_by: "DATE_UPDATED_UTC desc");
+				Console.WriteLine("PASS: GetOrganizations(), found " + organizations.Count + " organizations.");
+				passed += 1;
+				
+				if(organizations.Count > 0){
+					var organization = organizations[0];
+					int organization_id = organization["ORGANISATION_ID"].Value<int>();
+					
+					// Test GetOrganizationEmails();
+					try{
+						var emails = this.GetOrganizationEmails(organization_id);
+						Console.WriteLine("PASS: GetOrganizationEmails(), found " + emails.Count + " emails.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetOrganizationEmails()");
+						failed += 1;
+					}
+					
+					// Test GetOrganizationNotes();
+					try{
+						var notes = this.GetOrganizationNotes(organization_id);
+						Console.WriteLine("PASS: GetOrganizationNotes(), found " + notes.Count + " notes.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetOrganizationNotes()");
+						failed += 1;
+					}
+					
+					// Test GetOrganizationTasks();
+					try{
+						var tasks = this.GetOrganizationTasks(organization_id);
+						Console.WriteLine("PASS: GetOrganizationTasks(), found " + tasks.Count + " tasks.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetOrganizationTasks()");
+						failed += 1;
+					}
+				}
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetOrganizations()");
+				failed += 1;
+			}
+			
+			// Test AddOrganization
+			try{
+				var organization = new JObject();
+				organization["ORGANISATION_NAME"] = "Foo Corp";
+				organization["BACKGROUND"] = "Details";
+				organization = this.AddOrganization(organization);
+				Console.WriteLine("PASS: AddOrganization()");
+				passed += 1;
+				
+				// Test DeleteOrganization()
+				try{
+					this.DeleteOrganization(organization["ORGANISATION_ID"].Value<int>());
+					Console.WriteLine("PASS: DeleteOrganization()");
+					passed += 1;
+				}
+				catch(Exception){
+					Console.WriteLine("FAIL: DeleteOrganization()");
+					failed += 1;
+				}
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: AddOrganization()");
 				failed += 1;
 			}
 			
