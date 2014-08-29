@@ -32,9 +32,12 @@ namespace InsightlySDK{
 			request.Headers.Add("Authorization", "Basic " + credentials);
 			
 			if(this.body != null){
+				request.ContentLength = this.body.Length;
+				request.ContentType = "application/json";
 				var writer = new StreamWriter(request.GetRequestStream());
 				writer.Write(this.body);
 				writer.Flush();
+				writer.Close();
 			}
 			
 			var response = request.GetResponse();
@@ -71,7 +74,33 @@ namespace InsightlySDK{
 			this.method = method;
 			return this;
 		}
+
 		
+		// OData Query building methods
+		
+		public InsightlyRequest Top(int n){
+			return this.WithQueryParam("top", n.ToString());
+		}
+		
+		public InsightlyRequest Skip(int n){
+			return this.WithQueryParam("skip", n.ToString());
+		}
+		
+		public InsightlyRequest OrderBy(string order_by){
+			return this.WithQueryParam("orderby", order_by);
+		}
+		
+		public InsightlyRequest Filter(string filter){
+			return this.WithQueryParam("filter", filter);
+		}
+		
+		public InsightlyRequest Filters(ICollection<string> filters){
+			foreach(var filter in filters){
+				this.Filter(filter);
+			}
+			return this;
+		}
+
 		private string QueryString{
 			get{
 				if(query_params.Count > 0){
