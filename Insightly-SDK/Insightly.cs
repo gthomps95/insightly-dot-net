@@ -235,6 +235,90 @@ namespace InsightlySDK{
 			return this.Get ("/v2.1/CustomFields/" + id).AsJson<JObject>();
 		}
 		
+		/// <summary>
+		/// Get emails
+		/// </summary>
+		/// <returns>
+		/// List of emails
+		/// </returns>
+		/// <param name='top'>
+		/// OData top parameter.
+		/// </param>
+		/// <param name='skip'>
+		/// OData skip parameter.
+		/// </param>
+		/// <param name='order_by'>
+		/// OData orderby parameter.
+		/// </param>
+		/// <param name='filters'>
+		/// OData filters.
+		/// </param>
+		public JArray GetEmails(int? top=null, int? skip=null,
+		                        string order_by=null, List<string> filters=null){
+			var request = this.Get("/v2.1/Emails");
+			BuildODataQuery(request, top: top, skip: skip, order_by: order_by, filters: filters);
+			return request.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get specified the email.
+		/// </summary>
+		/// <returns>
+		/// The email with matching id.
+		/// </returns>
+		/// <param name='id'>
+		/// ID of email to get.
+		/// </param>
+		public JObject GetEmail(int id){
+			return this.Get("/v2.1/Emails/" + id).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete an email.
+		/// </summary>
+		/// <param name='id'>
+		/// ID of email to delete.
+		/// </param>
+		public void DeleteEmail(int id){
+			this.Delete("/v2.1/Emails/" + id).AsString();
+		}
+		
+		/// <summary>
+		/// Get comments for an email
+		/// </summary>
+		/// <returns>
+		/// List of email comments
+		/// </returns>
+		/// <param name='email_id'>
+		/// Email id.
+		/// </param>
+		public JArray GetEmailComments(int email_id){
+			return this.Get ("/v2.1/Emails/" + email_id + "/Comments").AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Add a comment to an existing email.
+		/// </summary>
+		/// <returns>
+		/// The comment, as returned by the server.
+		/// </returns>
+		/// <param name='email_id'>
+		/// ID of email to which the comment will be added.
+		/// </param>
+		/// <param name='body'>
+		/// Comment body.
+		/// </param>
+		/// <param name='owner_user_id'>
+		/// Owner's user id.
+		/// </param>
+		public JObject AddCommentToEmail(int email_id, string body, int owner_user_id){
+			var data = new JObject();
+			data["BODY"] = body;
+			data["OWNER_USER_ID"] = owner_user_id;
+			return this.Post("/v2.1/Emails/" + email_id + "/Comments")
+				.WithBody(data).AsJson<JObject>();
+		}
+		
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
 		}
@@ -378,6 +462,17 @@ namespace InsightlySDK{
 			}
 			catch(Exception){
 				Console.WriteLine ("FAIL: GetCustomFields()");
+				failed += 1;
+			}
+			
+			// Test GetEmails()
+			try{
+				var emails = this.GetEmails();
+				Console.WriteLine("PASS: GetEmails(), found " + emails.Count + " emails.");
+				passed += 1;
+			}
+			catch{
+				Console.WriteLine("FAIL: GetEmails()");
 				failed += 1;
 			}
 
