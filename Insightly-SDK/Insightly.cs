@@ -545,6 +545,200 @@ namespace InsightlySDK{
 				.WithBody(comment).AsJson<JObject>();
 		}
 		
+		/// <summary>
+		/// Get opportunities matching specified criteria.
+		/// </summary>
+		/// <returns>
+		/// Opportunities matching specified criteria.
+		/// </returns>
+		/// <param name='top'>
+		/// Return first N opportunities.
+		/// </param>
+		/// <param name='skip'>
+		/// Skip first N opportunities.
+		/// </param>
+		/// <param name='order_by'>
+		/// Order opportunities by specified field(s).
+		/// </param>
+		/// <param name='filters'>
+		/// List of OData filters to apply to query.
+		/// </param>
+		public JArray GetOpportunities(int? top=null, int? skip=null,
+		                               string order_by=null, List<string> filters=null){
+			var request = this.Get("/v2.1/Opportunities");
+			BuildODataQuery(request, top: top, skip: skip, order_by: order_by, filters: filters);
+			return request.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get an opportunity.
+		/// </summary>
+		/// <returns>
+		/// The opportunity with matching id.
+		/// </returns>
+		/// <param name='id'>
+		/// OPPORTUNITY_ID of desired opportunity.
+		/// </param>
+		public JObject GetOpportunity(int id){
+			return this.Get("/v2.1/Opportunities/" + id).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Add/update an opportunity.
+		/// </summary>
+		/// <returns>
+		/// The new/updated opportunity, as returned by the server.
+		/// </returns>
+		/// <param name='opportunity'>
+		/// The opportunity to add/update.
+		/// </param>
+		public JObject AddOpportunity(JObject opportunity){
+			var request = this.Request("/v2.1/Opportunities");
+			
+			if(IsValidId(opportunity["OPPORTUNITY_ID"])){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(opportunity).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete an opportunity.
+		/// </summary>
+		/// <param name='id'>
+		/// OPPORTUNITY_ID of opportunity to delete.
+		/// </param>
+		public void DeleteOpportunity(int id){
+			this.Delete("/v2.1/Opportunities/" + id).AsString();
+		}
+		
+		/// <summary>
+		/// Get history of states and reasons for an opportunity.
+		/// </summary>
+		/// <returns>
+		/// History of states and reasons associated with specified opportunity.
+		/// </returns>
+		/// <param name='opportunity_id'>
+		/// OPPORTUNITY_ID of opportunity to get history of.
+		/// </param>
+		public JArray GetOpportunityStateHistory(int opportunity_id){
+			return this.Get("/v2.1/Opportunities/" + opportunity_id + "/StateHistory")
+				.AsJson<JArray>();
+		}
+
+		/// <summary>
+		/// Get the emails linked to an opportunity.
+		/// </summary>
+		/// <returns>
+		/// The emails associated with specified opportunity.
+		/// </returns>
+		/// <param name='opportunity_id'>
+		/// OPPORTUNITY_ID of desired opportunity.
+		/// </param>
+		public JArray GetOpportunityEmails(int opportunity_id){
+			return this.Get("/v2.1/Opportunities/" + opportunity_id + "/Emails")
+				.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get notes linked to an opportunity
+		/// </summary>
+		/// <returns>
+		/// The notes associated with specified opportunity.
+		/// </returns>
+		/// <param name='opportunity_id'>
+		/// OPPORTUNITY_ID of desired opportunity.
+		/// </param>
+		public JArray GetOpportunityNotes(int opportunity_id){
+			return this.Get("/v2.1/Opportunities/" + opportunity_id + "/Notes")
+				.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get tasks linked to an opportunity.
+		/// </summary>
+		/// <returns>
+		/// The tasks associated with specified opportunity.
+		/// </returns>
+		/// <param name='opportunity_id'>
+		/// OPPORTUNITY_ID of desired opportunity.
+		/// </param>
+		public JArray GetOpportunityTasks(int opportunity_id){
+			return this.Get("/v2.1/Opportunities/" + opportunity_id + "/Tasks")
+				.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get a list of opportunity categories.
+		/// </summary>
+		/// <returns>
+		/// The opportunity categories.
+		/// </returns>
+		public JArray GetOpportunityCategories(){
+			return this.Get("/v2.1/OpportunityCategories")
+				.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get an opportunity categoriy.
+		/// </summary>
+		/// <returns>
+		/// The specified opportunity categoriy.
+		/// </returns>
+		/// <param name='id'>
+		/// CATEGORY_ID of desired opportunity category.
+		/// </param>
+		public JObject GetOpportunityCategoriy(int id){
+			return this.Get("/v2.1/OpportunityCategories/" + id)
+				.AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Add/update an opportunity category.
+		/// </summary>
+		/// <returns>
+		/// The new/updated opportunity category, as returned by the server.
+		/// </returns>
+		/// <param name='category'>
+		/// The category to add/update.
+		/// </param>
+		public JObject AddOpportunityCategory(JObject category){
+			var request = this.Request("/v2.1/OpportunityCategories");
+			
+			if(IsValidId(category["CATEGORY_ID"])){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(category).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete an opportunity category.
+		/// </summary>
+		/// <param name='id'>
+		/// CATEGORY_ID of opportunity category to delete.
+		/// </param>
+		public void DeleteOpportunityCategory(int id){
+			this.Delete("/v2.1/OpportunityCategories/" + id).AsString();
+		}
+		
+		/// <summary>
+		/// Get a list of opportunity state reasons.
+		/// </summary>
+		/// <returns>
+		/// The opportunity state reasons.
+		/// </returns>
+		public JArray GetOpportunityStateReasons(){
+			return this.Get("/v2.1/OpportunityStateReasons")
+				.AsJson<JArray>();
+		}
+
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
 		}
@@ -783,6 +977,7 @@ namespace InsightlySDK{
 				failed += 1;
 			}
 			
+			// Test GetNotes()
 			try{
 				var notes = this.GetNotes();
 				Console.WriteLine("PASS: GetNotes(), found " + notes.Count + " notes.");
@@ -792,7 +987,115 @@ namespace InsightlySDK{
 				Console.WriteLine("FAIL: GetNotes()");
 				failed += 1;
 			}
-
+			
+			// Test GetOpportunities
+			try{
+				var opportunities = this.GetOpportunities(order_by: "DATE_UPDATED_UTC desc", top: top);
+				Console.WriteLine("PASS: GetOpportunities(), found " + opportunities.Count + " opportunities.");
+				passed += 1;
+				
+				if(opportunities.Count > 0){
+					var opportunity = opportunities[0];
+					int opportunity_id = opportunity["OPPORTUNITY_ID"].Value<int>();
+					
+					// Test GetOpportunityEmails()
+					try{
+						var emails = this.GetOpportunityEmails(opportunity_id);
+						Console.WriteLine("PASS: GetOpportunityEmails(), found " + emails.Count + " emails.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetOpportunityEmails()");
+						failed += 1;
+					}
+					
+					// Test GetOpportunityNotes()
+					try{
+						var notes = this.GetOpportunityNotes(opportunity_id);
+						Console.WriteLine("PASS: GetOpportunityNotes(), found " + notes.Count + " notes.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetOpportunityNotes()");
+						failed += 1;
+					}
+					
+					// Test GetOpportunityTasks()
+					try{
+						var tasks = this.GetOpportunityTasks(opportunity_id);
+						Console.WriteLine("PASS: GetOpportunityTasks(), found " + tasks.Count + " tasks.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetOpportunityTasks()");
+						failed += 1;
+					}
+					
+					// Test GetOpportunityStateHistory()
+					try{
+						var history = this.GetOpportunityStateHistory(opportunity_id);
+						Console.WriteLine("PASS: GetOpportunityStateHistory(), found " + history.Count + " states in history.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetOpportunityStateHistory()");
+						failed += 1;
+					}
+				}
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetOpportunities()");
+				failed += 1;
+			}
+			
+			// Test GetOpportunityCategories()
+			try{
+				var categories = this.GetOpportunityCategories();
+				Console.WriteLine("PASS: GetOpportunityCategories(), found " + categories.Count + " categories.");
+				passed += 1;				
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetOpportunityCategories()");
+				failed += 1;
+			}
+			
+			// Test AddOpportunityCategory()
+			try{
+				var category = new JObject();
+				category["CATEGORY_NAME"] = "Test Category";
+				category["ACTIVE"] = true;
+				category["BACKGROUND_COLOR"] = "000000";
+				category = this.AddFileCategory(category);
+				Console.WriteLine("PASS: AddOpportuntityCategory()");
+				passed += 1;
+				
+				// Test DeleteOpportunityCategory()
+				try{
+					this.DeleteOpportunityCategory(category["CATEGORY_ID"].Value<int>());
+					Console.WriteLine("PASS: DeleteOpportunityCategory()");
+					passed += 1;
+				}
+				catch(Exception){
+					Console.WriteLine("FAIL: DeleteOpportunityCategory()");
+					failed += 1;
+				}
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: AddOpportunityCategory()");
+				failed += 1;
+			}
+			
+			// Test GetOpportunityStateReasons()
+			try{
+				var reasons = this.GetOpportunityStateReasons();
+				Console.WriteLine("PASS: GetOpportunityStateReasons(), found " + reasons.Count + " reasons.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetOpportunityStateReasons()");
+				failed += 1;
+			}
+			
 			if(failed > 0){
 				throw new Exception(failed + " Tests failed!");
 			}
