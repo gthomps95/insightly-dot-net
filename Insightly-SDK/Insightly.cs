@@ -870,6 +870,52 @@ namespace InsightlySDK{
 			return this.Get("/v2.1/Organisations/" + organization_id + "/Tasks")
 				.AsJson<JArray>();
 		}
+		
+		/// <summary>
+		/// Get a list of pipelines.
+		/// </summary>
+		/// <returns>
+		/// The pipelines.
+		/// </returns>
+		public JArray GetPipelines(){
+			return this.Get("/v2.1/Pipelines").AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get a pipeline.
+		/// </summary>
+		/// <returns>
+		/// The pipeline.
+		/// </returns>
+		/// <param name='id'>
+		/// Pipeline id.
+		/// </param>
+		public JObject GetPipeline(int id){
+			return this.Get("/v2.1/Pipelines/" + id).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Get the pipeline stages.
+		/// </summary>
+		/// <returns>
+		/// The pipeline stages.
+		/// </returns>
+		public JArray GetPipelineStages(){
+			return this.Get("/v2.1/PipelineStages").AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get a pipeline stage.
+		/// </summary>
+		/// <returns>
+		/// The pipeline stage.
+		/// </returns>
+		/// <param name='id'>
+		/// Pipeline stage's id.
+		/// </param>
+		public JObject GetPipelineStage(int id){
+			return this.Get("v2.1/PipelineStages/" + id).AsJson<JObject>();
+		}
 
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
@@ -1299,6 +1345,27 @@ namespace InsightlySDK{
 			}
 			catch(Exception){
 				Console.WriteLine("FAIL: AddOrganization()");
+				failed += 1;
+			}
+			
+			// Test GetPipelines()
+			try{
+				var pipelines = this.GetPipelines();
+				Console.WriteLine("PASS: GetPipelines(), found " + pipelines.Count + " pipelines.");
+				passed += 1;
+			}catch(Exception){
+				Console.WriteLine("FAIL: GetPipelines()");
+				failed += 1;
+			}
+			
+			// Test GetPipelineStages()
+			try{
+				var stages = this.GetPipelineStages();
+				Console.WriteLine("PASS: GetPipelineStages(), found " + stages.Count + " pipeline stages.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetPipelineStages()");
 				failed += 1;
 			}
 			
