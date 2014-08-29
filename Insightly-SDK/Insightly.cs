@@ -444,6 +444,107 @@ namespace InsightlySDK{
 			this.Delete("/v2.1/FileCategories/" + id).AsString();
 		}
 		
+		/// <summary>
+		/// Get a list of notes created by the user.
+		/// </summary>
+		/// <returns>
+		/// Notes matching specified criteria.
+		/// </returns>
+		/// <param name='top'>
+		/// Return first N notes.
+		/// </param>
+		/// <param name='skip'>
+		/// Skip the first N notes.
+		/// </param>
+		/// <param name='order_by'>
+		/// Order notes by specified field(s)
+		/// </param>
+		/// <param name='filters'>
+		/// List of OData filters to apply to results.
+		/// </param>
+		public JArray GetNotes(int? top=null, int? skip=null,
+		                       string order_by=null, List<string> filters=null){
+			var request = this.Get("/v2.1/Notes");
+			BuildODataQuery(request, top: top, skip: skip, order_by: order_by, filters: filters);
+			return request.AsJson<JArray>();
+		}
+
+		/// <summary>
+		/// Get a note.
+		/// </summary>
+		/// <returns>
+		/// The note with matching <c>id</c>.
+		/// </returns>
+		/// <param name='id'>
+		/// <c>NOTE_ID</c> of desired note.
+		/// </param>
+		public JObject GetNote(int id){
+			return this.Get("/v2.1/Notes/" + id).AsJson<JObject>();
+		}
+
+		/// <summary>
+		/// Add/update a note.
+		/// </summary>
+		/// <returns>
+		/// The new/updated note, as returned by the server.
+		/// </returns>
+		/// <param name='note'>
+		/// The note object to add or update.
+		/// </param>
+		public JObject AddNote(JObject note){
+			var request = this.Request("/v2.1/Notes");
+			
+			if(IsValidId(note["NOTE_ID"])){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(note).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete a note.
+		/// </summary>
+		/// <param name='id'>
+		/// NOTE_ID of note to delete.
+		/// </param>
+		public void DeleteNote(int id){
+			this.Delete("/v2.1/Notes/" + id).AsString();
+		}
+		
+		/// <summary>
+		/// Get comments attached to a note.
+		/// </summary>
+		/// <returns>
+		/// The note comments.
+		/// </returns>
+		/// <param name='note_id'>
+		/// <c>NOTE_ID</c> of desired note.
+		/// </param>
+		public JObject GetNoteComments(int note_id){
+			return this.Get("/v2.1/Notes/" + note_id + "/Comments")
+				.AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Attach a comment to a note.
+		/// </summary>
+		/// <returns>
+		/// Result from server.
+		/// </returns>
+		/// <param name='note_id'>
+		/// <c>NOTE_ID</c> of note to which comment will be attached.
+		/// </param>
+		/// <param name='comment'>
+		/// The comment to attach to the note.
+		/// </param>
+		public JObject AddNoteComment(int note_id, JObject comment){
+			return this.Post("/v2.1/Notes/" + note_id + "/Comments")
+				.WithBody(comment).AsJson<JObject>();
+		}
+		
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
 		}
@@ -681,6 +782,16 @@ namespace InsightlySDK{
 				Console.WriteLine("FAIL: AddFileCategory()");
 				failed += 1;
 			}
+			
+			try{
+				var notes = this.GetNotes();
+				Console.WriteLine("PASS: GetNotes(), found " + notes.Count + " notes.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetNotes()");
+				failed += 1;
+			}
 
 			if(failed > 0){
 				throw new Exception(failed + " Tests failed!");
@@ -727,6 +838,19 @@ namespace InsightlySDK{
 			}
 			
 			return request;
+		}
+		
+		/// <summary>
+		/// Check if <c>id</c> represents a valid object id.
+		/// </summary>
+		/// <returns>
+		/// <c>true</c> if <c>id</c> is not null and non-zero; otherwise, <c>false</c>.
+		/// </returns>
+		/// <param name='id'>
+		/// JToken object representing the object id to check.
+		/// </param>
+		private bool IsValidId(JToken id){
+			return ((id != null) && (id.Value<int>() > 0));
 		}
 		
 		private InsightlyRequest Get(string url_path){
