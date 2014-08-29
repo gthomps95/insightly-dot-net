@@ -192,6 +192,22 @@ namespace InsightlySDK{
 				.AsJson<JArray>();
 		}
 		
+		/// <summary>
+		/// Get a list of countries recognized by Insightly.
+		/// </summary>
+		/// <returns>
+		/// The countries recognized by Insightly.
+		/// </returns>
+		public JArray GetCountries(){
+			return this.Get("/v2.1/Countries").AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get the currencies recognized by Insightly
+		/// </summary>
+		/// <returns>
+		/// The currencies recognized by Insightly.
+		/// </returns>
 		public JArray GetCurrencies(){
 			return this.Get("/v2.1/Currencies").AsJson<JArray>();
 		}
@@ -309,6 +325,28 @@ namespace InsightlySDK{
 				throw ex;
 			}
 			
+			// Test GetCountries()
+			try{
+				var countries = this.GetCountries();
+				Console.WriteLine("PASS: GetCountries(), found " + countries.Count + " countries.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetCountries()");
+				failed += 1;
+			}
+			
+			// Test GetCurrencies()
+			try{
+				currencies = this.GetCurrencies();
+				Console.WriteLine("PASS: GetCurrencies(), found " + currencies.Count + " currencies.");
+				passed += 1;
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetCurrencies()");
+				failed += 1;
+			}
+
 			if(failed > 0){
 				throw new Exception(failed + " Tests failed!");
 			}
