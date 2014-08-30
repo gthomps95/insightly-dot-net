@@ -1218,11 +1218,158 @@ namespace InsightlySDK{
 		public JObject AddTaskComment(int task_id, JObject comment){
 			return this.Post("/v2.1/Tasks/" + task_id + "/Comments").WithBody(comment).AsJson<JObject>();
 		}
-
+		
+		/// <summary>
+		/// Get members of a team.
+		/// </summary>
+		/// <returns>
+		/// The team's members.
+		/// </returns>
+		/// <param name='team_id'>
+		/// <c>TEAM_ID</c> of desired team.
+		/// </param>
+		public JArray GetTeamMembers(int team_id){
+			return this.Get("/v2.1/TeamMembers/teamid=" + team_id).AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get a team member's details.
+		/// </summary>
+		/// <returns>
+		/// The team member.
+		/// </returns>
+		/// <param name='id'>
+		/// Desired team member's id.
+		/// </param>
+		public JObject GetTeamMember(int id){
+			return this.Get("/v2.1/TeamMembers/" + id).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Add a team member.
+		/// </summary>
+		/// <returns>
+		/// The new team member, as returned by the server.
+		/// </returns>
+		/// <param name='team_member'>
+		/// The team member to add.
+		/// </param>
+		public JObject AddTeamMember(JObject team_member){
+			return this.Post("/v2.1/TeamMembers").WithBody(team_member).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete a team member.
+		/// </summary>
+		/// <param name='id'>
+		/// Id of team member to be deleted.
+		/// </param>
+		public void DeleteTeamMember(int id){
+			this.Delete("/v2.1/TeamMembers/" + id).AsString();
+		}
+		
+		/// <summary>
+		/// Update a team member.
+		/// </summary>
+		/// <returns>
+		/// The updated team member, as returned by the server.
+		/// </returns>
+		/// <param name='team_member'>
+		/// The team member to update.
+		/// </param>
+		public JObject UpdateTeamMember(JObject team_member){
+			return this.Put("/v2.1/TeamMembers").WithBody(team_member).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Get teams matching specified criteria.
+		/// </summary>
+		/// <returns>
+		/// Matching teams.
+		/// </returns>
+		/// <param name='top'>
+		/// Return first N teams.
+		/// </param>
+		/// <param name='skip'>
+		/// Skip first N teams.
+		/// </param>
+		/// <param name='order_by'>
+		/// Order teams by specified field(s).
+		/// </param>
+		/// <param name='filters'>
+		/// List of OData filter statements to apply.
+		/// </param>/
+		public JArray GetTeams(int? top=null, int? skip=null,
+		                       string order_by=null, List<string> filters=null){
+			var request = this.Get("/v2.1/Teams");
+			BuildODataQuery(request, top: top, skip: skip, order_by: order_by, filters: filters);
+			return request.AsJson<JArray>();
+		}
+		
+		/// <summary>
+		/// Get a team.
+		/// </summary>
+		/// <returns>
+		/// The team.
+		/// </returns>
+		/// <param name='id'>
+		/// <c>TEAM_ID</c> of desired team.
+		/// </param>
+		public JObject GetTeam(int id){
+			return this.Get("/v2.1/Teams/" + id).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Add/update a team.
+		/// </summary>
+		/// <returns>
+		/// The new/updated team, as returned by the server.
+		/// </returns>
+		/// <param name='team'>
+		/// Team.
+		/// </param>
+		public JObject AddTeam(JObject team){
+			var request = this.Request("/v2.1/Teams");
+			
+			if(IsValidId(team["TEAM_ID"])){
+				request.WithMethod(HTTPMethod.PUT);
+			}
+			else{
+				request.WithMethod(HTTPMethod.POST);
+			}
+			
+			return request.WithBody(team).AsJson<JObject>();
+		}
+		
+		/// <summary>
+		/// Delete a team.
+		/// </summary>
+		/// <param name='id'>
+		/// <c>TEAM_ID</c> of team to delete.
+		/// </param>
+		public void DeleteTeam(int id){
+			this.Delete("/v2.1/Teams/" + id).AsString();
+		}
+		
+		/// <summary>
+		/// Get a list of users for this account.
+		/// </summary>
+		/// <returns>
+		/// This account's users.
+		/// </returns>
 		public JArray GetUsers(){
 			return this.Get ("/v2.1/Users/").AsJson<JArray>();
 		}
-		
+
+		/// <summary>
+		/// Get a user.
+		/// </summary>
+		/// <returns>
+		/// The user.
+		/// </returns>
+		/// <param name='id'>
+		/// Desired user's numeric id.
+		/// </param>
 		public JObject GetUser(int id){
 			return this.Get("/v2.1/Users/" + id).AsJson<JObject>();
 		}
@@ -1776,6 +1923,32 @@ namespace InsightlySDK{
 			}
 			catch(Exception){
 				Console.WriteLine("FAIL: GetTasks()");
+				failed += 1;
+			}
+			
+			// Test GetTeams
+			try{
+				var teams = this.GetTeams();
+				Console.WriteLine("PASS: GetTeams(), found " + teams.Count + " teams.");
+				passed += 1;
+
+				if(teams.Count > 0){
+					var team = teams[0];
+					
+					// Test GetTeamMembers
+					try{
+						var team_members = this.GetTeamMembers(team["TEAM_ID"].Value<int>());
+						Console.WriteLine("PASS: GetTeamMembers(), found " + team_members.Count + " team members.");
+						passed += 1;
+					}
+					catch(Exception){
+						Console.WriteLine("FAIL: GetTeamMembers()");
+						failed += 1;
+					}
+				}
+			}
+			catch(Exception){
+				Console.WriteLine("FAIL: GetTeams()");
 				failed += 1;
 			}
 			
