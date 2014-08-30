@@ -4,7 +4,25 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
 namespace InsightlySDK{
+	/// <summary>
+	/// This class comprises the public interface for the .NET Insightly SDK.
+	/// It provides user-friendly access to the the Insightly REST API
+	/// by generating HTTPS requests for common usage patterns,
+	/// and parsing the result from the server.
+	/// </summary>
+	/// <exception cref='ArgumentException'>
+	/// Is thrown when an argument passed to a method is invalid.
+	/// </exception>
+	/// <exception cref='Exception'>
+	/// Represents errors that occur during application execution.
+	/// </exception>
 	public class Insightly{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="InsightlySDK.Insightly"/> class.
+		/// </summary>
+		/// <param name='api_key'>
+		/// The API key for the account to be accessed.
+		/// </param>
 		public Insightly(String api_key){
 			this.api_key = api_key;
 		}
