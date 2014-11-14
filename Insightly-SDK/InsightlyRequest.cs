@@ -70,6 +70,18 @@ namespace InsightlySDK{
 			return this;
 		}
 		
+		public InsightlyRequest WithQueryParam(string name, int val){
+			this.WithQueryParam(name, val.ToString());
+			return this;
+		}
+		
+		public InsightlyRequest WithQueryParam(string name, List<int> values){
+			foreach(var val in values){
+				this.WithQueryParam(name, val);
+			}
+			return this;
+		}
+		
 		public InsightlyRequest WithMethod(HTTPMethod method){
 			this.method = method;
 			return this;

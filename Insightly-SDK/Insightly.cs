@@ -117,6 +117,15 @@ namespace InsightlySDK{
 		                          List<string> filters=null, int? top=null, int? skip=null, string order_by=null){
 			var request = this.Get("/v2.1/Contacts");
 			BuildODataQuery(request, filters: filters, top: top, skip: skip, order_by: order_by);
+			if(ids != null){
+				request.WithQueryParam("ids", ids);
+			}
+			if(email != null){
+				request.WithQueryParam("email", email);
+			}
+			if(tag != null){
+				request.WithQueryParam("tag", tag);
+			}
 			return request.AsJson<JArray>();
 		}
 
