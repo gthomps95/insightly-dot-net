@@ -32,7 +32,7 @@ namespace InsightlySDK{
 			request.Headers.Add("Authorization", "Basic " + credentials);
 			
 			if(this.body != null){
-				request.ContentLength = this.body.Length;
+				request.ContentLength = Encoding.UTF8.GetByteCount(this.body);
 				request.ContentType = "application/json";
 				var writer = new StreamWriter(request.GetRequestStream());
 				writer.Write(this.body);
