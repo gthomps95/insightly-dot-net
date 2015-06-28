@@ -24,6 +24,7 @@ namespace InsightlySDK{
 		public Stream AsInputStream(){
 			var url = new UriBuilder(BASE_URL);
 			url.Path = this.url_path;
+            url.Query = this.QueryString;
 			
 			var request = WebRequest.Create(url.ToString());
 			request.Method = this.method.ToString();
@@ -116,7 +117,7 @@ namespace InsightlySDK{
 		private string QueryString{
 			get{
 				if(query_params.Count > 0){
-					return "?" + String.Join("&", query_params);
+					return String.Join("&", query_params);
 				}
 				else{
 					return "";
