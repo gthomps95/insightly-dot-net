@@ -1479,19 +1479,47 @@ namespace InsightlySDK{
 				Console.WriteLine("FAIL: GetContacts()");
 				failed += 1;
 			}
-			
+            
 			// Test AddContact()
 			try{
 				var contact = new JObject();
 				contact["SALUTATION"] = "Mr";
 				contact["FIRST_NAME"] = "Testy";
 				contact["LAST_NAME"] = "McTesterson";
-				contact = this.AddContact(contact);
+
+                var contactInfos = new JArray();
+                var email = new JObject();
+                email["TYPE"] = "EMAIL";
+                email["LABEL"] = "Personal";
+                email["DETAIL"] = "test@example.com";
+                contactInfos.Add(email);
+                contact["CONTACTINFOS"] = contactInfos;
+
+                contact = this.AddContact(contact);
 				Console.WriteLine("PASS: AddContact()");
 				passed += 1;
-				
-				// Test DeleteContact()
-				try{
+
+                // Test GetContacts() by email
+                try
+                {
+                    var contacts = this.GetContacts(null, "test@example.com");
+
+                    if(contacts.Count != 1)
+                    {
+                        throw new Exception();
+                    }
+
+                    Console.WriteLine("PASS: GetContacts() by email, found " + contacts.Count + " contacts.");
+                    passed += 1;
+                }
+                catch (Exception){
+                    Console.WriteLine("FAIL: GetContacts() by email");
+                    failed += 1;
+                }
+
+                // Test DeleteContact()
+                try
+                {
 					this.DeleteContact(contact["CONTACT_ID"].Value<int>());
 					Console.WriteLine("PASS: DeleteContact()");
 					passed += 1;
